@@ -1,4 +1,4 @@
-
+﻿
 @'
 # AI-Powered Multi-Platform Prospect Discovery API
 
@@ -158,3 +158,60 @@ GitHub: https://github.com/Sangamesh3445/ai-prospect-discovery
 
 Developed as a technical assessment project.
 '@ | Set-Content -Path README.md -Encoding utf8
+
+## LLM Comparison and Recommendation
+
+Research date: 25 November 2026.
+
+The following models were compared for natural-language query understanding,
+structured JSON generation, cost, and integration suitability.
+
+### Model comparison
+
+Standard paid API prices in USD per million tokens:
+
+| Provider | Model | Input | Output |
+|---|---|---:|---:|
+| Google | Gemini 3.5 Flash | $1.50 | $9.00 |
+| Google | Gemini 3.5 Flash-Lite | $0.30 | $2.50 |
+| Anthropic | Claude Haiku 4.5 | $1.00 | $5.00 |
+
+Pricing references:
+
+- Google: https://ai.google.dev/gemini-api/docs/pricing
+- Anthropic: https://platform.claude.com/docs/en/about-claude/pricing
+
+Prices and model availability may change. Verify current rates before
+production deployment.
+
+### Evaluation criteria
+
+The models should be tested against the same five natural-language queries.
+
+Evaluation criteria:
+
+1. Correct prospect type extraction.
+2. Accurate location and industry identification.
+3. Relevant keyword extraction.
+4. Correct platform selection.
+5. Valid JSON matching the required schema.
+6. Response latency and API reliability.
+7. Input and output token cost.
+
+### Recommendation
+
+Gemini 3.5 Flash is selected for this implementation because the project
+already integrates the Google Gemini SDK and the model supports the
+required query-understanding workload.
+
+Gemini 3.5 Flash-Lite is a lower-cost alternative worth benchmarking.
+Claude Haiku 4.5 is an alternative from another provider.
+
+This recommendation is based on pricing and integration suitability.
+Equivalent live accuracy and latency benchmarks have not been completed.
+
+### Limitations
+
+The Gemini free tier has request quotas and may return rate-limit errors.
+Production deployments should use appropriate API access, request handling,
+and retry controls.
