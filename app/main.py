@@ -58,12 +58,19 @@ def prospect_discovery(
             **discovery_result,
         }
 
-    except LLMServiceError:
+    except LLMServiceError as exc:
         logger.exception("Query understanding service failed.")
 
+        if exc.status_code == 429:
+            detail = (
+                "Gemini API quota exceeded. Please retry after the quota resets."
+            )
+        else:
+            detail = "The query understanding service is unavailable."
+
         raise HTTPException(
-            status_code=502,
-            detail="The query understanding service is unavailable.",
+            status_code=exc.status_code,
+            detail=detail,
         )
 
     except SearchServiceError:
