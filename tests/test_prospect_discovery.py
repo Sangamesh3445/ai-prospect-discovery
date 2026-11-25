@@ -211,3 +211,34 @@ def test_linkedin_platform_identification():
     assert identify_platform(
         "https://linkedin.com/in/person-a"
     ) == "linkedin"
+
+# Generic website and Google domain identification tests
+
+def test_generic_website_identified_as_web():
+    from app.services.profile_extractor import identify_platform
+
+    assert identify_platform(
+        "https://cloudtech.io/about"
+    ) == "web"
+
+
+def test_google_domain_identification():
+    from app.services.profile_extractor import identify_platform
+
+    assert identify_platform(
+        "https://www.google.com/search"
+    ) == "google"
+
+
+def test_google_india_domain_identification():
+    from app.services.profile_extractor import identify_platform
+
+    assert identify_platform(
+        "https://www.google.co.in/search"
+    ) == "google"
+
+
+def test_invalid_platform_url_identification():
+    from app.services.profile_extractor import identify_platform
+
+    assert identify_platform("javascript:alert(1)") == "unknown"

@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 
 
 PLATFORM_DOMAINS = {
+    "google.com": "google",
+    "google.co.in": "google",
     "linkedin.com": "linkedin",
     "x.com": "x",
     "twitter.com": "x",
@@ -50,7 +52,7 @@ def identify_platform(url: str) -> str:
             if hostname == domain or hostname.endswith("." + domain):
                 return platform
 
-        return "google"
+        return "web"
 
     except (ValueError, TypeError):
         return "unknown"
