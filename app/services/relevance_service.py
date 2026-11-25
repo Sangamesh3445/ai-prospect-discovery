@@ -22,16 +22,16 @@ NON_PERSON_PAGE_TERMS = [
     "founder index",
     "founders",
     "list of founders",
+    "business insider",
 ]
 
 
 def has_founder_evidence(profile: dict) -> bool:
-    """Require evidence that a prospect actually has a founder role."""
+    """Require explicit evidence of a founder role."""
 
     title = str(profile.get("title") or "").lower()
     source = str(profile.get("source_text") or "").lower()
 
-    # Check the title or an explicitly labelled professional role.
     if any(term in title for term in FOUNDER_TERMS):
         return True
 
@@ -44,6 +44,37 @@ def has_founder_evidence(profile: dict) -> bool:
         any(term in line.lower() for term in FOUNDER_TERMS)
         for line in role_lines
     )
+
+
+def has_identifiable_name(profile: dict) -> bool:
+    """Reject missing or obviously non-person names."""
+
+    name = profile.get("name")
+
+    if not isinstance(name, str) or not name.strip():
+        return False
+
+    cleaned = name.strip()
+
+    invalid_names = {
+        "founder",
+        "co-founder",
+        "cofounder",
+        "ceo",
+        "linkedin profile",
+        "unknown",
+        "n/a",
+        "none",
+        "business insider",
+    }
+
+    if cleaned.lower() in invalid_names:
+        return False
+
+    if len(cleaned) < 2 or not re.search(r"[A-Za-z]", cleaned):
+        return False
+
+    return True
 
 
 def is_directory_or_job_page(profile: dict) -> bool:
@@ -88,11 +119,13 @@ def calculate_relevance(profile: dict, query_data: dict) -> int:
                 score += 15
 
     industry = query_data.get("industry")
+
     if isinstance(industry, str) and industry.strip():
         if industry.lower() in searchable_text:
             score += 15
 
     location = query_data.get("location")
+
     if isinstance(location, str) and location.strip():
         if location.lower() in searchable_text:
             score += 15
@@ -112,12 +145,13 @@ def calculate_relevance(profile: dict, query_data: dict) -> int:
     if profile.get("profile_url"):
         score += 20
 
-    # Founder searches require explicit role evidence.
     if "founder" in str(prospect_type).lower():
+        if not has_identifiable_name(profile):
+            return 0
+
         if not has_founder_evidence(profile):
             return 0
 
-    # Do not recommend obvious directory or job-listing pages.
     if is_directory_or_job_page(profile):
         return 0
 

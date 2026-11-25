@@ -242,3 +242,96 @@ def test_invalid_platform_url_identification():
     from app.services.profile_extractor import identify_platform
 
     assert identify_platform("javascript:alert(1)") == "unknown"
+
+
+
+
+def test_founder_article_without_person_name_rejected():
+    query = {
+        "prospect_type": "startup founders",
+        "industry": None,
+        "location": "Bengaluru",
+        "keywords": [],
+    }
+
+    profiles = [
+        {
+            "name": None,
+            "title": (
+                "I Moved to Bengaluru As a Startup Founder. "
+                "It's Not Silicon Valley. - Business Insider"
+            ),
+            "profile_url": (
+                "https://www.businessinsider.com/"
+                "startup-founder-bengaluru"
+            ),
+            "location": None,
+            "source_text": "",
+        }
+    ]
+
+    assert filter_relevant_profiles(profiles, query) == []
+
+
+def test_founder_profile_without_name_rejected():
+    query = {
+        "prospect_type": "startup founders",
+        "location": "Bengaluru",
+        "industry": None,
+        "keywords": [],
+    }
+
+    profiles = [
+        {
+            "name": None,
+            "title": "Co-Founder",
+            "profile_url": "https://linkedin.com/in/person-a",
+            "location": "Bengaluru",
+            "source_text": "Current role: Co-Founder",
+        }
+    ]
+
+    assert filter_relevant_profiles(profiles, query) == []
+
+
+def test_identifiable_founder_profile_accepted():
+    query = {
+        "prospect_type": "startup founders",
+        "location": "Bengaluru",
+        "industry": None,
+        "keywords": [],
+    }
+
+    profiles = [
+        {
+            "name": "Ankit Agarwal",
+            "title": "Co-Founder",
+            "company": "MesaSchool",
+            "profile_url": "https://linkedin.com/in/ankitagar",
+            "location": "Bengaluru, Karnataka, India",
+            "source_text": "Current role: Co-Founder",
+        }
+    ]
+
+    result = filter_relevant_profiles(profiles, query)
+
+    assert len(result) == 1
+    assert result[0]["name"] == "Ankit Agarwal"
+
+
+def test_linkedin_name_extracted_from_profile_title():
+    from app.services.profile_extractor import extract_profiles
+
+    results = [
+        {
+            "title": (
+                "Ankit Agarwal - Co-Founder - MesaSchool | LinkedIn"
+            ),
+            "url": "https://in.linkedin.com/in/ankitagar",
+            "content": "Current role: Co-Founder",
+        }
+    ]
+
+    profiles = extract_profiles(results)
+
+    assert profiles[0]["name"] == "Ankit Agarwal"

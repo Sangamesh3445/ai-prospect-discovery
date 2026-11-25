@@ -123,6 +123,56 @@ def extract_public_email(text: str):
     return None
 
 
+def extract_linkedin_name(title: str, url: str):
+    """Extract a person's name from a standard LinkedIn profile title."""
+
+    if not isinstance(title, str) or not isinstance(url, str):
+        return None
+
+    try:
+        parsed_url = urlparse(url)
+    except ValueError:
+        return None
+
+    if not parsed_url.path.lower().startswith("/in/"):
+        return None
+
+    # Example:
+    # Ankit Agarwal - Co-Founder - MesaSchool | LinkedIn
+    cleaned = re.sub(
+        r"\s*\|\s*linkedin\s*$",
+        "",
+        title,
+        flags=re.IGNORECASE,
+    ).strip()
+
+    candidate = re.split(
+        r"\s+-\s+|\s+\|\s+",
+        cleaned,
+        maxsplit=1,
+    )[0].strip()
+
+    if not candidate or len(candidate.split()) > 5:
+        return None
+
+    generic_roles = {
+        "founder",
+        "co-founder",
+        "cofounder",
+        "ceo",
+        "director",
+        "manager",
+        "engineer",
+        "linkedin",
+        "profile",
+    }
+
+    if candidate.lower() in generic_roles:
+        return None
+
+    return candidate
+
+
 def extract_profiles(search_results: list) -> list:
     """Extract structured information from public search results."""
 
@@ -176,6 +226,10 @@ def extract_profiles(search_results: list) -> list:
 
         if not name:
             name = extract_labeled_value(content, "Full name")
+
+        # Recover names from standard LinkedIn profile search titles.
+        if not name:
+            name = extract_linkedin_name(title, url)
 
         headline = extract_labeled_value(content, "Headline")
         current_role = extract_labeled_value(content, "Current role")
